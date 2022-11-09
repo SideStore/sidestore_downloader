@@ -289,7 +289,7 @@ fn _main() {
         anisette_url = s.trim().to_string();
     }
 
-    println!("Step 6/7: Extract and modify the .ipa");
+    println!("\n\nStep 6/7: Extract and modify the .ipa");
     if archive.extract(&save_path.join("temp")).is_err() {
         println!("Unable to extract the archive");
         return;
@@ -337,7 +337,7 @@ fn _main() {
         .dict_set_item("ALTPairingFile", pairing_file.into())
         .unwrap();
     info_plist
-        .dict_set_item("AltAnisetteServer", anisette_url.into())
+        .dict_set_item("customAnisetteURL", anisette_url.into())
         .unwrap();
 
     let info_plist = info_plist.to_string();
@@ -357,7 +357,7 @@ fn _main() {
     .unwrap();
     std::fs::remove_dir_all(save_path.join("temp")).unwrap();
 
-    println!("\n\nDone!!");
+    println!("\n\nDone!! Do not share this .ipa with others, it contains private information for your device.");
 }
 
 fn test_device(ip: std::net::Ipv4Addr, udid: String) -> bool {
