@@ -41,7 +41,7 @@ fn _main() {
         .interact()
         .unwrap();
 
-    let ipa_bytes = if (selection == 0 || selection == 1) {
+    let ipa_bytes = if selection == 0 || selection == 1 {
         let url = if selection == 0 {
             "https://github.com/SideStore/SideStore/releases/latest/download/SideStore.ipa"
                 .to_string()
