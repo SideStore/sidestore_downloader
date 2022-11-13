@@ -23,7 +23,7 @@ fn _main() {
     println!(
         r#"Welcome to the SideStore downloader.
         You will be guided through the steps of downloading the SideStore .ipa and modifying it for your device.
-        Make sure your device is plugged in so we can pull the information required from it.
+        Make sure your device is plugged in or connected via network so we can pull the information required from it.
         "#
     );
     #[cfg(target_os = "macos")]
@@ -37,13 +37,15 @@ fn _main() {
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("We will download SideStore from the latest stable release. Would you like to specify a different URL?")
         .default(0)
-        .items(&[ "No (recommended)", "Yes"])
+        .items(&[ "No (recommended)", "Yes", "Choose a local file"])
         .interact()
         .unwrap();
-    let url = match selection {
-        0 => "https://github.com/SideStore/SideStore/releases/latest/download/SideStore.ipa"
-            .to_string(),
-        1 => {
+
+    let ipa_bytes = if (selection == 0 || selection == 1) {
+        let url = if selection == 0 {
+            "https://github.com/SideStore/SideStore/releases/latest/download/SideStore.ipa"
+                .to_string()
+        } else {
             println!("Enter the URL (ending in .ipa) for SideStore");
             let mut s = String::new();
             stdin()
@@ -51,23 +53,43 @@ fn _main() {
                 .expect("Did not enter a correct string");
 
             s.trim().to_string()
-        }
-        _ => unreachable!(),
-    };
-
-    let ipa_bytes = match ureq::get(&url).call() {
-        Ok(i) => i,
-        Err(e) => {
-            println!("Could not download from specified URL: {:?}", e);
+        };
+        let ipa_bytes = match ureq::get(&url).call() {
+            Ok(i) => i,
+            Err(e) => {
+                println!("Could not download from specified URL: {:?}", e);
+                return;
+            }
+        };
+        let mut x_vec = Vec::new();
+        if ipa_bytes.into_reader().read_to_end(&mut x_vec).is_err() {
+            println!("Error getting bytes from URL");
             return;
         }
+        x_vec
+    } else {
+        println!("Enter the path to the SideStore .ipa");
+        let mut s = String::new();
+        stdin()
+            .read_line(&mut s)
+            .expect("Did not enter a correct string");
+
+        let path = Path::new(s.trim());
+        let mut file = match File::open(path) {
+            Ok(f) => f,
+            Err(e) => {
+                println!("Could not open file: {:?}", e);
+                return;
+            }
+        };
+        let mut x_vec = Vec::new();
+        if file.read_to_end(&mut x_vec).is_err() {
+            println!("Error getting bytes from file");
+            return;
+        }
+        x_vec
     };
-    let mut x_vec = Vec::new();
-    if ipa_bytes.into_reader().read_to_end(&mut x_vec).is_err() {
-        println!("Error getting bytes from URL");
-        return;
-    }
-    let cursor = std::io::Cursor::new(x_vec);
+    let cursor = std::io::Cursor::new(ipa_bytes);
     let mut archive = match zip::read::ZipArchive::new(cursor) {
         Ok(a) => a,
         Err(e) => {
