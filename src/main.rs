@@ -362,7 +362,7 @@ fn _main() {
         .dict_set_item("customAnisetteURL", anisette_url.into())
         .unwrap();
     info_plist
-        .dict_set_item("Bundle identifier", "com.rileytestut.AltStore".into())
+        .dict_set_item("CFBundleIdentifier", "com.rileytestut.AltStore".into())
         .unwrap();
 
     let info_plist = info_plist.to_string();
