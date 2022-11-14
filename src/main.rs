@@ -5,6 +5,7 @@ use std::{
     io::{stdin, Read, Seek, Write},
     path::{Path, PathBuf},
     str::FromStr,
+    sync::Arc,
 };
 
 use dialoguer::{theme::ColorfulTheme, Select};
@@ -54,7 +55,12 @@ fn _main() {
 
             s.trim().to_string()
         };
-        let ipa_bytes = match ureq::get(&url).call() {
+
+        let agent = ureq::AgentBuilder::new()
+            .tls_connector(Arc::new(native_tls::TlsConnector::new().unwrap()))
+            .build();
+
+        let ipa_bytes = match agent.get(&url).call() {
             Ok(i) => i,
             Err(e) => {
                 println!("Could not download from specified URL: {:?}", e);
