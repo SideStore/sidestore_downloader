@@ -354,7 +354,10 @@ fn _main() {
         .unwrap();
 
     let pairing_file = match userpref::read_pair_record(device.get_udid()) {
-        Ok(p) => p.to_string(),
+        Ok(mut p) => {
+            p.dict_set_item("UDID", device.get_udid().into()).unwrap();
+            p.to_string()
+        }
         Err(e) => {
             println!("Failed to read pairing file for device from muxer: {:?}", e);
             return;
@@ -366,9 +369,6 @@ fn _main() {
         .unwrap();
     info_plist
         .dict_set_item("customAnisetteURL", anisette_url.into())
-        .unwrap();
-    info_plist
-        .dict_set_item("CFBundleIdentifier", "com.rileytestut.AltStore".into())
         .unwrap();
 
     let info_plist = info_plist.to_string();
