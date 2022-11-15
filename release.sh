@@ -15,13 +15,14 @@ zip -j release/sidestore-downloader-windows.zip target/x86_64-pc-windows-gnu/rel
 # MacOS #
 #########
 # Building for MacOS requires MacOS because Apple's linker is proprietary
-if [[ $(uname -s) != 'Darwin' ]]; then
+if [[ $(uname -s) == 'Darwin' ]]; then
     # Build the binaries
     echo "Building MacOS version, the OS given to us by the gods."
     cargo build --target x86_64-apple-darwin --release
     cargo build --target aarch64-apple-darwin --release
     # Combine the binaries into a fat binary
     lipo -create -output sidestore-downloader-macos target/x86_64-apple-darwin/release/sidestore_downloader target/aarch64-apple-darwin/release/sidestore_downloader
+    codesign -s - -f sidestore-downloader-macos
     mkdir -p sidestore-downloader
     mv sidestore-downloader-macos sidestore-downloader/sidestore-downloader
     # Place into a DMG to keep 
