@@ -285,39 +285,7 @@ fn _main() {
         }
     }
 
-    println!("\n\nStep 5/7: Choose an anisette server");
-    let default_anisettes = vec![
-        (
-            "Sideloadly (recommended for most users)",
-            "https://sideloadly.io/anisette/irGb3Quww8zrhgqnzmrx",
-        ),
-        ("Macley US", "http://191.101.206.188:6969/"),
-        ("Macley DE", "http://45.132.246.138:6969/"),
-        ("DrPudding US", "https://sign.puddingg.xyz/"),
-        ("DrPudding FR", "https://sign.rheaa.xyz/"),
-        ("Custom", "custom_todo"),
-    ];
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Choose an anisette server")
-        .default(0)
-        .items(
-            &default_anisettes
-                .iter()
-                .map(|x| x.0.to_owned())
-                .collect::<Vec<String>>()
-                .to_vec(),
-        )
-        .interact()
-        .unwrap();
-    let mut anisette_url = default_anisettes[selection].1.to_owned();
-    if anisette_url.as_str() == "custom_todo" {
-        println!("Enter the URL to the anisette server. Be careful, as a malicious server can access your Apple account!");
-        let mut s = String::new();
-        stdin().read_line(&mut s).unwrap();
-        anisette_url = s.trim().to_string();
-    }
-
-    println!("\n\nStep 6/7: Extract and modify the .ipa");
+    println!("\n\nStep 5/6: Extract and modify the .ipa");
     if archive.extract(&save_path.join("temp")).is_err() {
         println!("Unable to extract the archive");
         return;
@@ -367,16 +335,13 @@ fn _main() {
     info_plist
         .dict_set_item("ALTPairingFile", pairing_file.into())
         .unwrap();
-    info_plist
-        .dict_set_item("customAnisetteURL", anisette_url.into())
-        .unwrap();
 
     let info_plist = info_plist.to_string();
     std::fs::remove_file(&plist_path).unwrap();
     let mut f = std::fs::File::create(plist_path).unwrap();
     let _ = f.write(info_plist.as_bytes()).unwrap();
 
-    println!("\n\nStep 7/7: Compress ipa");
+    println!("\n\nStep 6/6: Compress ipa");
     pls_zip(
         save_path.join("temp").to_str().unwrap(),
         save_path
