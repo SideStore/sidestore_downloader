@@ -245,7 +245,7 @@ fn _main() {
                 println!("Enter the local IP address of your device");
                 let mut s = String::new();
                 stdin().read_line(&mut s).expect("bad uh oh abort");
-                let ip = match std::net::Ipv4Addr::from_str(s.trim()) {
+                let ip = match std::net::IpAddr::from_str(s.trim()) {
                     Ok(i) => i,
                     Err(e) => {
                         println!("Could not parse input: {:?}", e);
@@ -356,8 +356,8 @@ fn _main() {
     println!("\n\nDone!! Do not share this .ipa with others, it contains private information for your device.");
 }
 
-fn test_device(ip: std::net::Ipv4Addr, udid: String) -> bool {
-    let device = Device::new(udid, Some(std::net::IpAddr::V4(ip)), 696969);
+fn test_device(ip: std::net::IpAddr, udid: String) -> bool {
+    let device = Device::new(udid, Some(ip), 696969);
     match device.new_heartbeat_client("ss_downloader_tester") {
         Ok(_) => true,
         Err(e) => {
